@@ -1,0 +1,106 @@
+:root {
+    --primary: #0D1B2A;
+    --bg: #FFFFFF;
+    --text: #1F2937;
+    --border: #E5E7EB;
+    --gray-light: #F9FAFB;
+
+    --status-ok-bg: #DCFCE7;
+    --status-ok-text: #166534;
+    --status-redirect-bg: #FFEDD5;
+    --status-redirect-text: #9A3412;
+    --status-bad-request-bg: #FEE2E2;
+    --status-bad-request-text: #991B1B;
+    --status-server-error-bg: #F3E8FF;
+    --status-server-error-text: #6B21A8;
+}
+
+*,
+*::after,
+*::before {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    display: flex;
+    justify-content: center;
+    padding: 4rem 2rem;
+}
+
+main {
+    width: 100%;
+    max-width: 800px;
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: var(--primary);
+    margin-bottom: 2.5rem;
+    text-align: center;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 3rem;
+}
+
+input {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    font-size: 1rem;
+    font-family: inherit;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background-color: var(--gray-light);
+    transition: all 0.2s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background-color: #fff;
+    box-shadow: 0 0 0 4px rgba(13, 27, 42, 0.05);
+}
+
+button {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: inherit;
+    color: #fff;
+    background-color: var(--primary);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+    h1 {
+        font-size: 1.75rem;
+    }
+
+    body {
+        padding: 2rem 1rem;
+    }
+
+}
