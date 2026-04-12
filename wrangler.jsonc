@@ -1,5 +1,15 @@
 {
     "name": "acortador-enlaces",
     "main": "worker.js",
-    "binding": "DB"
+    "compatibility_date": "2026-01-01",
+    "d1_databases": [
+        {
+            "binding": "DB",
+            "database_name": "acortador_enlaces_db",
+            "database_id": "01eb0b8d-96d8-496d-b7fc-75b7ac87e8f8"
+        }
+    ],
+    "observability": {
+        "enabled": true
+    }
 }
