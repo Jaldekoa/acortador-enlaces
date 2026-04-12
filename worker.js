@@ -1,11 +1,12 @@
 export default {
-    async fetch(request) {
-
+    async fetch(request, env, ctx) {
         const FRONTEND_PAGE = 'https://acortador-enlaces.pages.dev';
+
         const headers = {
             'Access-Control-Allow-Origin': '*',
             'Content-Type': 'application/json'
         };
+
         const corsHeaders = {
             ...headers,
             'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -15,30 +16,91 @@ export default {
         // Request preflight
         if (request.method === "OPTIONS") {
             return new Response(null, { status: 204, headers: corsHeaders });
-        };
+        }
 
-        // Crear la shortURL desde la longURL
-        if (request.method === 'POST') {
-            const { longURL } = await request.json();
-            const slug = await getSlug(longURL);
-            const data = { shortURL: `${FRONTEND_PAGE}/${slug}` };
+        const url = new URL(request.url);
 
-            return new Response(JSON.stringify(data), { headers });
-        };
+        // POST
+        if (request.method === 'POST' && url.pathname === '/api/shorten') {
+            try {
+                const { longURL } = await request.json();
 
-        // Obtener la longURL y redirigir a la shortURL
+                if (!longURL) {
+                    return new Response(JSON.stringify({ error: 'URL requerida' }), { status: 400, headers });
+                }
+
+                // 1. Comprobar si la URL ya existe en la base de datos
+                const existingLink = await env.DB.prepare('SELECT short_url FROM table_links WHERE long_url = ?')
+                    .bind(longURL)
+                    .first();
+
+                let slug;
+
+                if (existingLink) {
+                    // Si ya existe, devolvemos el código que ya teníamos
+                    slug = existingLink.short_url;
+                } else {
+                    // Si no existe, generamos uno nuevo y lo guardamos
+                    slug = generateShortCode();
+
+                    await env.DB.prepare('INSERT INTO table_links (short_url, long_url, hits, active) VALUES (?, ?, 0, 1)')
+                        .bind(slug, longURL)
+                        .run();
+                }
+
+                const data = { shortURL: `${FRONTEND_PAGE}/${slug}` };
+                return new Response(JSON.stringify(data), { headers });
+
+            } catch (error) {
+                return new Response(JSON.stringify({ error: error.message }), { status: 500, headers });
+            }
+        }
+
+        // GET
         if (request.method === 'GET') {
+            const slug = url.pathname.slice(1);
 
-        };
+            if (!slug) {
+                return Response.redirect(FRONTEND_PAGE, 301);
+            }
 
-        return new Response('Not found', {
+            try {
+                // Buscamos la URL original en D1
+                const record = await env.DB.prepare('SELECT long_url, active FROM table_links WHERE short_url = ?')
+                    .bind(slug)
+                    .first();
+
+                // Si existe y está activa, redirigimos
+                if (record && record.active === 1) {
+
+                    // Sumamos 1 a las visitas
+                    const updateHits = env.DB.prepare('UPDATE table_links SET hits = hits + 1 WHERE short_url = ?')
+                        .bind(slug)
+                        .run();
+                    ctx.waitUntil(updateHits);
+
+                    // Redirección HTTP 302
+                    return Response.redirect(record.long_url, 302);
+                }
+            } catch (error) {
+                return new Response('Database Error', { status: 500 });
+            }
+        }
+
+        // Si la ruta no existe o el registro no está activo
+        return new Response('Not found or inactive link', {
             status: 404,
             headers: corsHeaders
         });
     }
 };
 
-async function getSlug(url) {
-    const randomText = 'En un lugar de la Mancha, de cuyo nombre no quiero acordarme, no ha mucho tiempo que vivía un hidalgo de los de lanza en astillero, adarga antigua, rocín flaco y galgo corredor. Una olla de algo más vaca que carnero, salpicón las más noches, duelos y quebrantos los sábados, lantejas los viernes, algún palomino de añadidura los domingos, consumían las tres partes de su hacienda. El resto della concluían sayo de velarte, calzas de velludo para las fiestas, con sus pantuflos de lo mesmo, y los días de entresemana se honraba con su vellorí de lo más fino. Tenía en su casa una ama que pasaba de los cuarenta, y una sobrina que no llegaba a los veinte, y un mozo de campo y plaza, que así ensillaba el rocín como tomaba la podadera. Frisaba la edad de nuestro hidalgo con los cincuenta años; era de complexión recia, seco de carnes, enjuto de rostro, gran madrugador y amigo de la caza. Quieren decir que tenía el sobrenombre de Quijada, o Quesada, que en esto hay alguna diferencia en los autores que deste caso escriben; aunque por conjeturas verosímiles se deja entender que se llamaba Quijana. Pero esto importa poco a nuestro cuento: basta que en la narración dél no se salga un punto de la verdad.'
-    const slug = await crypto.subtle.digest({ name: 'SHA-256', }, url);
-};
+// Generar un slug corto (6 caracteres alfanuméricos)
+function generateShortCode(length = 6) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
