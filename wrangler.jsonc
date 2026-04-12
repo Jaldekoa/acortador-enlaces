@@ -1,4 +1,5 @@
 {
     "name": "acortador-enlaces",
-    "main": "worker.js"
+    "main": "worker.js",
+    "binding": "DB"
 }
