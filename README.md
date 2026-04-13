@@ -1,185 +1,135 @@
-# 🔗 Acortador de Enlaces Serverless (Cloudflare D1)
+<div align="center">
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-Acortador%20Enlaces-0051AF?style=for-the-badge&logo=cloudflare-pages&logoColor=white)](https://acortador-enlaces.pages.dev)
+# 🔗 Acortador de Enlaces Serverless
+
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Acortador_Enlaces-0051AF?style=for-the-badge&logo=cloudflare-pages&logoColor=white)](https://acortador-enlaces.pages.dev)
+
+</div>
+
 [![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
-[![CSS3](https://img.shields.io/badge/CSS3-663399?style=for-the-badge&logo=css&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
+[![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
 [![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
-[![Cloudflare D1](https://img.shields.io/badge/Cloudflare-D1%20SQL-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)](https://developers.cloudflare.com/d1/)
+[![Cloudflare D1](https://img.shields.io/badge/Cloudflare-D1_SQL-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)](https://developers.cloudflare.com/d1/)
 
-Un acortador de URLs moderno, rápido y extremadamente ligero, construido enteramente sobre la infraestructura **Serverless de Cloudflare**. Este proyecto demuestra el poder de la integración de frontend estático (Pages), lógica de backend (Workers) y base de datos SQL (D1).
+Una solución moderna y extremadamente rápida para la gestión de URLs cortas, construida íntegramente sobre la infraestructura global de **Cloudflare**. Combina la potencia del Edge Computing con la persistencia de una base de datos SQL serverless.
+
+![Previsualización del acortador de enlaces](./Thumbnail.png)
 
 ---
 
 ## 📝 Descripción
 
-Este proyecto permite a los usuarios transformar URLs largas y complejas en enlaces cortos y fáciles de compartir.
-
-La aplicación utiliza **Cloudflare Pages** para servir una interfaz de usuario limpia y oscura (con estilos CSS modernos y gradientes visuales). Cuando un usuario interactúa con la interfaz, el frontend se comunica con un **Cloudflare Worker**. Este Worker maneja la lógica de negocio (generación de códigos únicos, validación) e interactúa con **Cloudflare D1**, una base de datos SQLite nativa de Cloudflare, para almacenar y recuperar los enlaces.
-
-## ✨ Funcionalidades
-
-* 🚀 **Acortamiento Instantáneo:** Generación rápida de códigos cortos únicos para cualquier URL válida.
-* 🚦 **Redirección de Alta Velocidad:** Las redirecciones son manejadas en el "Edge" por el Worker, minimizando la latencia.
-* 📊 **Contador de Visitas (Hits):** Cada redirección exitosa incrementa un contador en la base de datos (basado en el esquema proporcionado).
-* 🛡️ **Validación de URLs:** El frontend y backend validan que la entrada sea una URL correcta antes de procesarla.
-* 🌓 **Interfaz Moderna:** Diseño oscuro optimizado para la experiencia del usuario.
-
-## 🛠️ Stack Tecnológico
-
-* **Frontend (Cloudflare Pages):** HTML5, CSS3 (con diseño oscuro moderno), JavaScript Vanilla.
-* **Backend & API (Cloudflare Workers):** Lógica de servidor y enrutamiento en el Edge.
-* **Base de Datos (Cloudflare D1):** Almacenamiento SQL (SQLite) para los enlaces.
+El **Acortador de Enlaces** permite transformar URLs largas y pesadas en enlaces cortos y memorables. A diferencia de otras soluciones, este proyecto no solo realiza la redirección, sino que gestiona un estado persistente en **Cloudflare D1**, permitiendo llevar un control de la actividad (hits) y el estado de cada enlace en tiempo real.
 
 ---
 
-## ⚙️ Arquitectura y Flujo Técnico
+## ✨ Funcionalidades
 
-El proyecto sigue una arquitectura Serverless moderna dividida en tres capas principales que interactúan entre sí.
+* **Generación de Slugs Alfanuméricos:** Crea códigos únicos de 6 caracteres para cada URL.
+* **Redirección en el Edge:** Las redirecciones se procesan en el punto de presencia de Cloudflare más cercano al usuario, garantizando latencia mínima.
+* **Analítica Básica (Hits):** Incrementa automáticamente un contador en la base de datos SQL con cada visita.
+* **Persistencia Inteligente:** Si una URL ya ha sido acortada previamente, el sistema recupera el enlace existente en lugar de duplicarlo.
+* **Interfaz Moderna:** Diseño oscuro (Dark Mode) optimizado para una experiencia de usuario limpia y funcional.
 
-### 📊 Diagrama de Arquitectura
+## 🛠️ Stack Tecnológico
 
-<div style="text-align:center">
+* **Frontend:** HTML5, CSS3, JavaScript Vanilla (ES6+), servido en **Cloudflare Pages**.
+* **Backend (API):** **Cloudflare Workers** gestionando peticiones POST y GET.
+* **Base de Datos:** **Cloudflare D1** (SQLite nativo en el Edge).
+* **Configuración:** Wrangler (Cloudflare CLI).
 
-```mermaid
-graph TD
-    User(Usuario)
-    
-    subgraph Cloudflare_Platform [Cloudflare Platform]
-        Pages[Cloudflare Pages<br/>Estáticos / Frontend]
-        Worker[Cloudflare Worker<br/>Lógica API / Backend]
-        D1[(Cloudflare D1 DB<br/>SQLite)]
-    end
+---
 
-    User -->|Visita /| Pages
-    Pages -->|Petición POST Crear| Worker
-    User -->|Visita /:shortCode| Worker
-    Worker <-->|Consulta/Inserción| D1
-```
+## ⚙️ Enfoque Técnico
 
-</div>
+El proyecto separa la capa de presentación (Pages) de la capa lógica y de datos (Worker + D1). Esto permite que el frontend sea extremadamente ligero mientras que el Worker actúa como un orquestador entre el cliente y la base de datos SQL.
 
-## 👉 Flujo de Lógica: Creación y Redirección
-El siguiente diagrama detalla cómo se gestiona la base de datos basándose en el esquema proporcionado (`short_code`, `long_url`, `hits`, `active`):
+### Flujo de Decisión del Backend
+Para optimizar el almacenamiento y evitar registros redundantes, el Worker sigue una lógica de verificación previa antes de generar cualquier código nuevo:
 
-<div style="text-align:center">
+![Flujo de lógica del Worker](./assets/excalidraw.png)
+
+> [!TIP]
+> **Eficiencia en D1:** Gracias a este flujo, si 100 usuarios intentan acortar la misma URL (ej: `google.com`), la base de datos solo almacenará un registro, devolviendo a todos el mismo `short_url`.
+
+### Diagrama de Flujo (Creación y Uso)
 
 ```mermaid
 sequenceDiagram
-    autonumber
-    participant U as Usuario (Navegador)
-    participant FE as Frontend (JS en Pages)
+    participant U as Usuario
+    participant FE as Frontend (Pages)
     participant W as Cloudflare Worker
-    participant D1 as D1 Database (table_links)
+    participant DB as Cloudflare D1 (SQL)
 
-    Note over U, FE: Flujo de Creación (GUI)
-    U->>FE: Introduce URL larga y pulsa "Acortar"
-    FE->>W: Petición POST /api/shorten con long_url
-    W->>D1: SQL: SELECT long_url FROM table_links WHERE long_url = ?
-    alt URL ya existe
-        D1-->>W: Devuelve registro existente
-    else URL nueva
-        W->>W: Genera short_code único
-        W->>D1: SQL: INSERT INTO table_links (short_code, long_url, hits, active) VALUES (?, ?, 0, 1)
-        D1-->>W: Confirmación de inserción
+    Note over U, DB: Proceso de Acortamiento
+    U->>FE: Introduce URL Larga
+    FE->>W: POST /api/shorten {longURL}
+    W->>DB: SELECT * WHERE long_url = ?
+    alt Existe en DB
+        DB-->>W: Devuelve short_url existente
+    else Es nueva
+        W->>W: Genera slug aleatorio
+        W->>DB: INSERT (short_url, long_url, hits: 0)
     end
-    W-->>FE: Devuelve JSON con short URL (base_url + short_code)
+    W-->>FE: JSON {shortURL: worker_url/slug}
     FE->>U: Muestra enlace acortado
 
-    Note over U, W: Flujo de Redirección (Directo)
-    U->>W: GET t.co/:shortCode (Enlace corto)
-    W->>D1: SQL: SELECT long_url, active FROM table_links WHERE short_code = ?
-    D1-->>W: Devuelve registro (o nulo)
-    
-    alt Registro Existe & Activo
-        W->>D1: SQL: UPDATE table_links SET hits = hits + 1 WHERE short_code = ?
-        D1-->>W: Confirmación (async)
-        W-->>U: HTTP 302 Redirect a long_url
-    else Inactivo o No Existe
-        W-->>U: HTTP 404 Not Found (Página de error bonita)
-    end
+    Note over U, DB: Proceso de Redirección
+    U->>W: Accede a worker_url/slug
+    W->>DB: SELECT long_url WHERE short_url = ?
+    W->>DB: UPDATE hits = hits + 1
+    W-->>U: HTTP 302 Redirect a URL Larga
 ```
 
-</div>
-
-## 📂 Estructura del Proyecto
-La estructura es sencilla y sigue el estándar para proyectos que combinan Pages y Workers.
-
-```
-.
-├── src_frontend/       # Archivos estáticos para Cloudflare Pages
-│   ├── index.html      # Interfaz de usuario
-│   ├── styles.css      # Estilos modernos (dark mode)
-│   └── script.js       # Lógica del cliente (fetch al Worker)
-├── schema.sql          # Script SQL para inicializar la base de datos D1
-├── worker.js           # Lógica del Cloudflare Worker (backend API)
-├── wrangler.jsonc      # Configuración de Wrangler (Bindings para D1 y Pages)
-└── README.md           # Documentación
-```
-
-## 🗄️ Esquema de la Base de Datos D1
-Basado en el archivo `tabla_links.csv` proporcionado, la estructura de la tabla `table_links` es la siguiente:
+## 🗄️ Esquema de Base de Datos
+El sistema utiliza una tabla optimizada en Cloudflare D1 con la siguiente estructura:
 
 ```sql
 CREATE TABLE table_links (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, -- Recomendado para indexación interna
-    short_code TEXT NOT NULL UNIQUE,     -- El código corto (ej: 'aBcDe')
-    long_url TEXT NOT NULL,              -- La URL de destino original
-    hits INTEGER DEFAULT 0,              -- Contador de visitas
-    active INTEGER DEFAULT 1,             -- Estado (1: Activo, 0: Inactivo)
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP -- Recomendado para control de tiempo
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  short_url TEXT NOT NULL UNIQUE,   -- El slug generado (ej: 'aBcDe1')
+  long_url TEXT NOT NULL,           -- URL de destino
+  hits INTEGER DEFAULT 0,           -- Contador de visitas
+  active INTEGER DEFAULT 1          -- Estado del enlace
 );
+```
 
--- Índice para acelerar las redirecciones
-CREATE INDEX idx_short_code ON table_links(short_code);
+## 📂 Estructura del Proyecto
+
+```
+.
+├── index.html          # Interfaz de usuario
+├── style.css           # Estilos (Dark Mode)
+├── script.js           # Consumo de la API y manejo del DOM
+├── worker.js           # Lógica del backend y consultas SQL
+├── schema.sql          # Definición de tablas para D1
+├── wrangler.jsonc      # Configuración de bindings y entorno
+└── README.md           # Documentación
 ```
 
 ## 🚀 Instalación y Despliegue
-Sigue estos pasos para desplegar tu propio acortador en Cloudflare.
 
-### Prerrequisitos
-Cuenta de Cloudflare.
+1. Clonar y forkear el repositorio:
 
-Node.js y npm instalados.
+ ```bash
+ git clone https://github.com/Jaldekoa/acortador-enlaces.git
+ ```
 
-Wrangler CLI instalado (npm install -g wrangler).
+ 2. Crear y configurar un worker en [Cloudflare Workers](https://workers.cloudflare.com/):
 
-### Pasos
-**1. Clonar el repositorio:**
-```bash
-git clone [https://github.com/tu-usuario/link-shortener-d1.git](https://github.com/tu-usuario/link-shortener-d1.git)
-cd link-shortener-d1
-```
+    - Copiándo y pegando el código del archivo `worker.js` en un nuevo Worker de Cloudflare ó
 
-**2. Iniciar sesión en Cloudflare:**
-```bash
-wrangler login
-```
+3. Crear y configurar una base de datos SQL en [Cloudflare D1](https://developers.cloudflare.com/d1/):
 
-**3. Crear la Base de Datos D1:**
-```
-wrangler d1 create link-shortener-db
-```
-Copia el `database_id` que te devuelve la consola y actualízalo en tu archivo `wrangler.jsonc`.
+    - Crea una nueva tabla usando el archivo `schema.sql`.
 
-4. Inicializar el Esquema de D1:
-```bash
-# Reemplaza 'link-shortener-db' con el nombre que elegiste
-wrangler d1 execute link-shortener-db --file=./schema.sql
-```
+4. Modifique los datos del archivo `wrangler.json` por los de su Worker y D1, deje vacío el comando de compilación, deje como `/` el directorio raíz de su repositorio del fork y use `exit 0` como comando de implementación.
 
-5. Desplegar el Worker (Backend):
-```bash
-wrangler deploy
-```
+> [!IMPORTANT]
+> Recuerde añadir el enlace entre el worker y la BBDD D1.
 
-**6. Desplegar el Frontend (Pages):**
-Puedes hacerlo desde el panel de control de Cloudflare conectando este repositorio a Pages, o usando Wrangler:
-```bash
-wrangler pages deploy src_frontend --project-name=tu-proyecto-pages
-```
+---
 
 ## 👤 Autor
-Jon Aldeko - GitHub Profile
-
-Desarrollado como una demostración técnica de la integración de Cloudflare Pages, Workers y D1.
+[![GitHub](https://img.shields.io/badge/GitHub-Jaldekoa-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Jaldekoa)
