@@ -1,6 +1,7 @@
 export default {
     async fetch(request, env, ctx) {
         const FRONTEND_PAGE = 'https://acortador-enlaces.pages.dev';
+        const WORKER_URL = 'https://acortador-enlaces.jaldekoa.workers.dev';
 
         const headers = {
             'Access-Control-Allow-Origin': '*',
@@ -48,7 +49,7 @@ export default {
                         .run();
                 }
 
-                const data = { shortURL: `${FRONTEND_PAGE}/${slug}` };
+                const data = { shortURL: `${WORKER_URL}/${slug}` };
                 return new Response(JSON.stringify(data), { headers });
 
             } catch (error) {
