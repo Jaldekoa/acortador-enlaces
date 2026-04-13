@@ -4,7 +4,7 @@ export default {
         const WORKER_URL = 'https://acortador-enlaces.jaldekoa.workers.dev';
 
         const headers = {
-            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Origin': FRONTEND_PAGE,
             'Content-Type': 'application/json'
         };
 
