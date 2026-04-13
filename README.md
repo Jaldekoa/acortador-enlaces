@@ -12,9 +12,13 @@
 [![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
 [![Cloudflare D1](https://img.shields.io/badge/Cloudflare-D1_SQL-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)](https://developers.cloudflare.com/d1/)
 
-Una solución moderna y extremadamente rápida para la gestión de URLs cortas, construida íntegramente sobre la infraestructura global de **Cloudflare**. Combina la potencia del Edge Computing con la persistencia de una base de datos SQL serverless.
+Una solución moderna y rápida para la gestión de URLs cortas, construida íntegramente sobre la infraestructura global de **Cloudflare**. Combina la potencia del Edge Computing con la persistencia de una base de datos SQL serverless.
 
-![Previsualización del acortador de enlaces](./Thumbnail.png)
+<div align="center">
+
+![Previsualización del acortador de enlaces](./assets/Thumbnail.png)
+
+</div>
 
 ---
 
